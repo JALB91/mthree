@@ -21,9 +21,21 @@ string gameItemToString(const GameItem& item)
     }
 }
 
+void printRow(int width)
+{
+    for (int x = 0; x < width; x++)
+    {
+        cout << "- - ";
+    }
+
+    cout << "-" << endl;
+}
+
 void printBoard(const Board& board)
 {
     string boardStr = "";
+
+    printRow(board.getBoardWidth());
 
     for (int y = 0; y < board.getBoardHeight(); y++)
     {
@@ -31,13 +43,13 @@ void printBoard(const Board& board)
 
         for (int x = 0; x < board.getBoardWidth(); x++)
         {
-            cout << gameItemToString(GameItem{ItemType::ITEM_1}) << "|";
+            cout << " " + gameItemToString(GameItem{ItemType::ITEM_1}) << " |";
         }
 
         cout << endl;
-    }
 
-    cout << "^L";
+        printRow(board.getBoardWidth());
+    }
 }
 
 } // namespace utils

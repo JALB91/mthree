@@ -10,9 +10,9 @@ int main()
 {
     std::map<BoardPos, Tile> tilesMap;
 
-    for (uint8_t x = 0; x < 10; x++)
+    for (uint8_t x = 0; x < 5; x++)
     {
-        for (uint8_t y = 0; y < 10; y++)
+        for (uint8_t y = 0; y < 5; y++)
         {
             tilesMap[BoardPos{x, y}] = Tile();
         }
@@ -21,8 +21,6 @@ int main()
     Board b {tilesMap};
 
     utils::printBoard(b);
-    
-    std::getc(stdin);
     
     return 0;
 }

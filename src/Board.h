@@ -19,6 +19,8 @@ public:
     inline const uint8_t getBoardHeight() const { return this->height; }
     inline const uint8_t getBoardWidth() const { return this->width; }
 
+    bool hasTile(const BoardPos& pos);
+
 protected:
 
 private:

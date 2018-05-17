@@ -9,14 +9,20 @@ tilesMap(tilesMap)
 {
     for (const auto& pair: tilesMap)
     {
-        this->width = std::max(this->width, pair.first.x);
-        this->height = std::max(this->height, pair.first.y);
+        this->width = std::max(this->width, static_cast<uint8_t>(pair.first.x + 1));
+        this->height = std::max(this->height, static_cast<uint8_t>(pair.first.y + 1));
     }
 }
 
 Board::~Board()
 {
     
+}
+
+
+bool Board::hasTile(const BoardPos& pos)
+{
+    return (this->tilesMap.find(pos) != this->tilesMap.end());
 }
 
 } //namespace mthree
