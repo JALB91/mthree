@@ -2,7 +2,8 @@
 
 namespace mthree {
 
-Tile::Tile()
+Tile::Tile(const GameItem& item /* = GameItem{} */):
+item(item)
 {
 
 }
@@ -10,6 +11,12 @@ Tile::Tile()
 Tile::~Tile()
 {
 
+}
+
+
+bool Tile::hasItem() const
+{
+    return (this->item.getType() != ItemType::EMPTY && this->item.getColor() != ItemColor::NO_COLOR);
 }
 
 } // namespace mthree

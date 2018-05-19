@@ -22,9 +22,9 @@ Board::~Board()
 }
 
 
-bool Board::hasTile(const BoardPos& pos)
+bool Board::hasTile(const BoardPos& pos) const
 {
-    return (this->tilesMap.find(pos) != this->tilesMap.end());
+    return (this->tilesMap.find(pos) != this->tilesMap.cend());
 }
 
 } //namespace mthree

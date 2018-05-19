@@ -14,7 +14,7 @@ int main()
     {
         for (uint8_t y = 0; y < 5; y++)
         {
-            tilesMap[BoardPos{x, y}] = Tile();
+            tilesMap[BoardPos{x, y}] = Tile(GameItem{ItemType::BOMB, ItemColor::BLUE});
         }
     }
 

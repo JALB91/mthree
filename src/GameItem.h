@@ -2,19 +2,22 @@
 #define GAME_ITEM_H
 
 #include "ItemType.h"
+#include "ItemColor.h"
 
 namespace mthree {
 
 class GameItem
 {
 public:
-    GameItem(const ItemType& type);
+    GameItem(const ItemType& type = ItemType::EMPTY, const ItemColor& color = ItemColor::NO_COLOR);
     ~GameItem();
 
-    inline const ItemType& getItemType() const { return type; }
+    inline const ItemType& getType() const { return type; }
+    inline const ItemColor& getColor() const { return color; }
 
 protected:
-    const ItemType& type;
+    ItemType type;
+    ItemColor color;
 
 private:
 

@@ -16,11 +16,11 @@ public:
     ~Board();
 
     inline const std::map<BoardPos, Tile>& getTilesMap() const { return this->tilesMap; }
-    inline const uint8_t getBoardHeight() const { return this->height; }
-    inline const uint8_t getBoardWidth() const { return this->width; }
+    inline const uint8_t getHeight() const { return this->height; }
+    inline const uint8_t getWidth() const { return this->width; }
 
-    bool hasTile(const BoardPos& pos);
-
+    bool hasTile(const BoardPos& pos) const;
+    
 protected:
 
 private:

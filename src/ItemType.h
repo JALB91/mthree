@@ -5,11 +5,8 @@ namespace mthree {
 
 enum class ItemType
 {
-    ITEM_1,
-    ITEM_2,
-    ITEM_3,
-    ITEM_4,
-    ITEM_5,
+    EMPTY,
+    ITEM,
     ROW_H,
     ROW_V,
     BOMB,

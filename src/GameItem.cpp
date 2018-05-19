@@ -2,8 +2,12 @@
 
 namespace mthree {
 
-GameItem::GameItem(const ItemType& type):
-type(type)
+GameItem::GameItem(
+    const ItemType& type /* = ItemType::EMPTY */, 
+    const ItemColor& color /* = ItemColor::NO_COLOR */
+    ):
+type(type),
+color(color)
 {
 
 }
