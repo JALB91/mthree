@@ -13,12 +13,24 @@ public:
     Pos(T x, T y):
     x(x),
     y(y)
-    {}
+    {
+		
+	}
 
     T x;
     T y;
 
 public:
+	bool operator==(const Pos<T>& other) const
+	{
+		return (this->x == other.x && this->y == other.y);
+	}
+
+	bool operator!=(const Pos<T>& other) const
+	{
+		return (this->x != other.x || this->y != other.y);
+	}
+
     bool operator>(const Pos<T>& other) const
     {
         return (this->x > other.x || (this->x == other.x && this->y > other.y));
@@ -31,8 +43,10 @@ public:
 
 };
 
-using BoardPos = Pos<uint8_t>;
+using BoardPos = Pos<int>;
 using FPos = Pos<float>;
+
+const BoardPos INVALID_POS = BoardPos{ -1, -1 };
 
 } // namespace mthree
 

@@ -2,7 +2,8 @@
 
 namespace mthree {
 
-Tile::Tile(const GameItem& item /* = GameItem{} */):
+Tile::Tile(const BoardPos& pos /* = BoardPos{} */, const GameItem& item /* = GameItem{} */):
+pos(pos),
 item(item)
 {
 

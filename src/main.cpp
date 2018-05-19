@@ -20,7 +20,15 @@ int main()
 
     Board b {tilesMap};
 
-    utils::printBoard(b);
+	while (auto c = getc(stdin))
+	{
+		if (c == 'q')
+		{
+			break;
+		}
+
+		utils::printBoard(b);
+	}
     
     return 0;
 }
