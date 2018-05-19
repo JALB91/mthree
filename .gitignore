@@ -3,6 +3,9 @@
 build/**
 !build/.gitkeep
 
+# Visual Studio folder
+.vs/**
+
 # Prerequisites
 *.d
 
