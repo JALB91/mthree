@@ -1,6 +1,7 @@
 #include "Board.h"
 
 #include <algorithm>
+#include <assert.h>
 
 using namespace std;
 
@@ -22,28 +23,52 @@ Board::~Board()
 }
 
 
-Tile& Board::getTileAt(const BoardPos& pos)
+Tile* Board::getTileAt(const BoardPos& pos)
 {
-	assert(this->hasTile(pos));
-	return this->tilesMap.at(pos);
+	return this->hasTile(pos) ? &this->tilesMap.at(pos) : nullptr;
 }
 
-Tile& Board::getAdjacentTile(const Tile& tile, const BoardDir& dir)
+Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir)
 {
-	assert(this->hasAdjacentTile(tile.getPos()));
-	return this->getTileAt(this->getAdjacentPos(tile.getPos()));
+	if (!tile) return nullptr;
+	return this->getTileAt(this->getAdjacentPos(tile->getPos(), dir));
 }
 
-vector<Tile&> Board::getAdjacentTiles(const BoardPos& pos)
+
+vector<Tile*> Board::getAdjacentTiles(const Tile* tile)
 {
-	
+	if (!tile) return {};
+
+	vector<Tile*> result;
+
+	for (const BoardDir& dir: ALL_DIRS)
+	{
+		if (auto adjacent = this->getAdjacentTile(tile, dir))
+		{
+			result.push_back(adjacent);
+		}
+	}
+
+	return result;
 }
 
-vector<Tile&> Board::getAdjacentTiles(const Tile& tile)
+vector<Tile*> Board::getAdjacentTiles(const BoardPos &pos)
 {
-	return this->getAdjacentTiles(tile.getPos());
+	return this->getAdjacentTiles(this->getTileAt(pos));
 }
 
+
+vector<BoardPos> Board::getAllAdjacentPos(const BoardPos& pos) const
+{
+	vector<BoardPos> result;
+
+	for (const BoardDir& dir: ALL_DIRS)
+	{
+		result.push_back(this->getAdjacentPos(pos, dir));
+	}
+
+	return result;
+}
 
 BoardPos Board::getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const
 {

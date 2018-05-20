@@ -4,7 +4,6 @@
 #include <map>
 #include <vector>
 #include <cstdint>
-#include <assert.h>
 
 #include "Pos.h"
 #include "Tile.h"
@@ -22,11 +21,13 @@ public:
     inline const uint8_t getHeight() const { return this->height; }
     inline const uint8_t getWidth() const { return this->width; }
     
-	Tile& getTileAt(const BoardPos& pos);
-	Tile& getAdjacentTile(const Tile& tile, const BoardDir& dir);
-	std::vector<Tile&> getAdjacentTiles(const BoardPos& pos);
-	std::vector<Tile&> getAdjacentTiles(const Tile& tile);
+	Tile* getTileAt(const BoardPos& pos);
+	Tile* getAdjacentTile(const Tile* tile, const BoardDir& dir);
 
+    std::vector<Tile*> getAdjacentTiles(const Tile *tile);
+    std::vector<Tile*> getAdjacentTiles(const BoardPos& pos);
+
+    std::vector<BoardPos> getAllAdjacentPos(const BoardPos& pos) const;
 	BoardPos getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const;
 
 	bool hasTile(const BoardPos& pos) const;

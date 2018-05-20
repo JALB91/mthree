@@ -9,7 +9,7 @@ namespace mthree {
 class Tile
 {
 public:
-	Tile(const BoardPos& p = BoardPos{}, const GameItem& item = GameItem{});
+	Tile(const BoardPos& p = BoardPos{0, 0}, const GameItem& item = GameItem{});
     ~Tile();
 
 	inline const BoardPos& getPos() const { return this->pos; }
