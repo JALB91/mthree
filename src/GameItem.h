@@ -9,6 +9,8 @@ namespace mthree {
 class GameItem
 {
 public:
+	static const GameItem EMPTY_ITEM;
+
     GameItem(const ItemType& type = ItemType::EMPTY, const ItemColor& color = ItemColor::NO_COLOR);
     ~GameItem();
 

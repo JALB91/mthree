@@ -26,15 +26,15 @@ public:
 
     inline bool isInTheWayOf(const Match& other) const
     {
-        std::vector<BoardPos> intersections;
+		for (const BoardPos& pos: other.positions)
+		{
+			if (find(this->positions.cbegin(), this->positions.end(), pos) != this->positions.end())
+			{
+				return true;
+			}
+		}
 
-        std::set_intersection(
-            this->positions.begin(), this->positions.end(),
-            other.positions.begin(), other.positions.end(),
-            intersections.begin()
-        );
-
-        return (!intersections.empty());
+		return false;
     }
 
 public:

@@ -1,6 +1,9 @@
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
 #include "Board.h"
+#include "GameLogic.h"
 #include "GameUtils.h"
 
 using namespace std;
@@ -8,19 +11,30 @@ using namespace mthree;
 
 int main()
 {
-    std::map<BoardPos, Tile> tilesMap;
+    vector<Tile> tiles;
 
-    for (uint8_t x = 0; x < 5; x++)
+	srand(time(NULL));
+
+    for (int x = 0; x < 5; x++)
     {
-        for (uint8_t y = 0; y < 5; y++)
+        for (int y = 0; y < 5; y++)
         {
             const BoardPos pos {x, y};
-            
-            tilesMap[pos] = Tile{pos, GameItem{ItemType::BOMB, ItemColor::BLUE}};
+			int color = rand() % ALL_COLORS.size();
+            tiles.push_back(Tile{pos, GameItem{ItemType::ITEM, static_cast<ItemColor>(color)}});
         }
     }
 
-    Board b {tilesMap};
+	vector<Generator> generators;
+
+	for (int x = 0; x < 5; x++)
+	{
+		const BoardPos pos{ x, -1 };
+		generators.push_back(Generator{pos});
+	}
+
+	GameLogic gameLogic{ Board{tiles, generators} };
+	gameLogic.step();
 
 	while (auto c = getc(stdin))
 	{
@@ -28,8 +42,14 @@ int main()
 		{
 			break;
 		}
-
-		utils::printBoard(b);
+		else if (c == 'p')
+		{
+			utils::printBoard(gameLogic.getBoard());
+		}
+		else if (c == 'm')
+		{
+			gameLogic.trySwap(BoardPos{ 0, 0 }, BoardPos{ 1, 0 });
+		}
 	}
     
     return 0;

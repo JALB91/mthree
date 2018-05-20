@@ -7,13 +7,14 @@ using namespace std;
 
 namespace mthree {
 
-Board::Board(const map<BoardPos, Tile>& tilesMap):
-tilesMap(tilesMap)
+Board::Board(const vector<Tile>& tiles, const vector<Generator>& generators):
+tiles(tiles),
+generators(generators)
 {
-    for (const auto& pair: tilesMap)
+    for (const Tile& tile: tiles)
     {
-        this->width = std::max(this->width, static_cast<uint8_t>(pair.first.x + 1));
-        this->height = std::max(this->height, static_cast<uint8_t>(pair.first.y + 1));
+        this->width = std::max(this->width, static_cast<uint8_t>(tile.getPos().x + 1));
+		this->height = std::max(this->height, static_cast<uint8_t>(tile.getPos().y + 1));
     }
 }
 
@@ -23,9 +24,43 @@ Board::~Board()
 }
 
 
+const Tile* Board::getTileAt(const BoardPos& pos) const
+{
+	if (this->hasTile(pos))
+	{
+		auto it = find_if(this->tiles.cbegin(), this->tiles.cend(), [pos](const Tile& tile) {
+			return (tile.getPos() == pos);
+		});
+
+		return &(*it);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+const Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir) const
+{
+	if (!tile) return nullptr;
+	return this->getTileAt(this->getAdjacentPos(tile->getPos(), dir));
+}
+
+
 Tile* Board::getTileAt(const BoardPos& pos)
 {
-	return this->hasTile(pos) ? &this->tilesMap.at(pos) : nullptr;
+	if (this->hasTile(pos))
+	{
+		auto it = find_if(this->tiles.begin(), this->tiles.end(), [pos](const Tile& tile) {
+			return (tile.getPos() == pos);
+		});
+
+		return &(*it);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir)
@@ -78,10 +113,10 @@ BoardPos Board::getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const
 	switch (dir)
 	{
 	case BoardDir::UP:
-		offsetY = 1;
+		offsetY = -1;
 		break;
 	case BoardDir::DOWN:
-		offsetY = -1;
+		offsetY = 1;
 		break;
 	case BoardDir::RIGHT:
 		offsetX = 1;
@@ -91,20 +126,45 @@ BoardPos Board::getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const
 		break;
 	}
 
-	const BoardPos result{ pos.x + offsetX, pos.y + offsetY };
-
 	return BoardPos{ pos.x + offsetX, pos.y + offsetY };
+}
+
+
+Generator* Board::getGeneratorAt(const BoardPos& pos)
+{
+	auto it = find_if(this->generators.cbegin(), this->generators.cend(), [pos](const Generator& generator) {
+		return (generator.getPos() == pos);
+	});
+
+	return (it != this->generators.cend() ? &(*it) : nullptr);
 }
 
 
 bool Board::hasTile(const BoardPos& pos) const
 {
-    return (this->tilesMap.find(pos) != this->tilesMap.cend());
+	auto it = find_if(this->tiles.begin(), this->tiles.end(), [pos](const Tile& tile) {
+		return (tile.getPos() == pos);
+	});
+    return (it != this->tiles.end());
 }
 
 bool Board::hasAdjacentTile(const BoardPos& pos, const BoardDir& dir) const
 {
 	return this->hasTile(this->getAdjacentPos(pos, dir));
+}
+
+
+bool Board::hasGenerator(const BoardPos& pos) const
+{
+	auto it = find_if(this->generators.begin(), this->generators.end(), [pos](const Generator& generator) {
+		return (generator.getPos() == pos);
+	});
+	return (it != this->generators.end());
+}
+
+bool Board::hasAdjacentGenerator(const BoardPos& pos, const BoardDir& dir) const
+{
+	return this->hasGenerator(this->getAdjacentPos(pos, dir));
 }
 
 } //namespace mthree

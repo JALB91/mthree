@@ -18,11 +18,14 @@ public:
 
     inline const Board& getBoard() const { return this->board; }
 
-    bool canSwap(const BoardPos& a, const BoardPos& b);
+	void step();
 
+    bool canSwap(const BoardPos& a, const BoardPos& b);
     void trySwap(const BoardPos& a, const BoardPos& b);
 
 protected:
+	BoardDir getOppositeDirectionOf(const BoardDir& dir) const;
+
     void updateMatches();
     std::vector<BoardPos> getAdjacentsMatching(const BoardPos& pos, std::vector<BoardPos>& exclude);
     std::vector<Match> composeValidMatches(const std::vector<BoardPos>& adjacents);
@@ -39,6 +42,7 @@ protected:
 private:
     Board board;
     GameState state;
+	const BoardDir gravity;
 
     std::vector<Match> matches;
 

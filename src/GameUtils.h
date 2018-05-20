@@ -84,7 +84,15 @@ void printBoard(const Board& board)
         for (uint8_t x = 0; x < board.getWidth(); ++x)
         {
             BoardPos p {x, y};
-            cout << " " + gameItemToString(board.getTilesMap().at(p).getItem()) << " |";
+
+			if (board.hasTile(p))
+			{
+				cout << " " + gameItemToString(board.getTileAt(p)->getItem()) << " |";
+			}
+			else
+			{
+				cout << "    |";
+			}
         }
 
         cout << endl;

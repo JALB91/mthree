@@ -9,14 +9,68 @@ bool sortByCol(const BoardPos& a, const BoardPos& b) { return ((a.x < b.x) || (a
 
 GameLogic::GameLogic(const Board& board):
 board(board),
-state(GameState::USER_INTERACTION)
+state(GameState::MATCHING),
+gravity(BoardDir::DOWN)
 {
-
+	this->updateMatches();
 }
 
 GameLogic::~GameLogic()
 {
 
+}
+
+
+BoardDir GameLogic::getOppositeDirectionOf(const BoardDir& dir) const
+{
+	switch (dir)
+	{
+		case BoardDir::UP:		return BoardDir::DOWN;
+		case BoardDir::RIGHT:	return BoardDir::LEFT;
+		case BoardDir::DOWN:	return BoardDir::UP;
+		case BoardDir::LEFT:	return BoardDir::RIGHT;
+	}
+}
+
+
+void GameLogic::step()
+{
+	if (this->hasMatches())
+	{
+		for (const Match& match: this->matches)
+		{
+			this->computeMatch(match);
+		}
+
+		this->matches.clear();
+	}
+
+	for (Tile& tile: this->board.getTiles())
+	{
+		const BoardPos& p = tile.getPos();
+
+		if (!tile.hasItem())
+		{
+			const BoardPos& adjacent = this->board.getAdjacentPos(p, this->getOppositeDirectionOf(this->gravity));
+			Tile* other = this->board.getTileAt(adjacent);
+
+			if (other && other->hasItem())
+			{
+				tile.setItem(other->getItem());
+				other->setItem(GameItem::EMPTY_ITEM);
+				this->step();
+				return;
+			}
+			else if (const Generator* generator = this->board.getGeneratorAt(adjacent))
+			{
+				tile.setItem(generator->generate());
+				this->step();
+				return;
+			}
+		}
+	}
+
+	this->updateMatches();
 }
 
 
@@ -106,6 +160,23 @@ void GameLogic::updateMatches()
             this->matches.insert(this->matches.end(), newMatches.begin(), newMatches.end());
         }
     }
+
+	for (int i = 0; i < this->matches.size(); ++i)
+	{
+		const Match& current = this->matches[i];
+
+		for (const Match& other: this->matches)
+		{
+			if (find(this->matches.cbegin(), this->matches.cend(), other) == find(this->matches.cbegin(), this->matches.cend(), current)) continue;
+
+			if (current == other || (current.isInTheWayOf(other) && !current.isBetterThan(other)))
+			{
+				this->matches.erase(this->matches.begin() + i);
+				i--;
+				break;
+			}
+		}
+	}
 }
 
 vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<BoardPos>& exclude)
@@ -131,7 +202,7 @@ vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<Boa
 
     for (const BoardPos& adj: adjacents)
     {
-        if (find(exclude.begin(), exclude.end(), adj) != exclude.end())
+        if (find(exclude.begin(), exclude.end(), adj) != exclude.end() || !this->board.hasTile(adj))
         {
             continue;
         }
@@ -150,7 +221,7 @@ vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<Boa
         }
     }
 
-    return result;
+	return result;
 }
 
 /*
@@ -225,7 +296,10 @@ void GameLogic::filterPosBy(vector<vector<BoardPos>>& out, const vector<BoardPos
 
 void GameLogic::computeMatch(const Match& match)
 {
-
+	for (const BoardPos& pos: match.getPositions())
+	{
+		this->board.getTileAt(pos)->setItem(GameItem::EMPTY_ITEM);
+	}
 }
 
 
