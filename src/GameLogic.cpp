@@ -34,27 +34,35 @@ BoardDir GameLogic::getOppositeDirectionOf(const BoardDir& dir) const
 bool GameLogic::step(Board& board) const
 {
     bool result = false;
+    vector<Tile*> modifiedTiles;
 
 	for (Tile& tile: board.getTiles())
 	{
 		const BoardPos& p = tile.getPos();
+        auto it_curr = find(modifiedTiles.cbegin(), modifiedTiles.cend(), &tile); 
 
-		if (!tile.hasItem())
+		if (it_curr == modifiedTiles.cend() && !tile.hasItem())
 		{
 			const BoardPos& adjacent = board.getAdjacentPos(p, this->getOppositeDirectionOf(this->gravity));
 			Tile* other = board.getTileAt(adjacent);
+            auto it_oth = find(modifiedTiles.cbegin(), modifiedTiles.cend(), other);
 
-			if (other && other->hasItem())
+			if (other && it_oth == modifiedTiles.cend() && other->hasItem())
 			{
-				tile.setItem(other->getItem());
+                tile.setItem(other->getItem());
 				other->setItem(GameItem::EMPTY_ITEM);
+
+                modifiedTiles.push_back(&tile);
+                modifiedTiles.push_back(other);
 
                 result = true;
 			}
 			else if (const Generator* generator = board.getGeneratorAt(adjacent))
 			{
 				tile.setItem(generator->generate());
-
+                
+                modifiedTiles.push_back(&tile);
+                
                 result = true;
 			}
 		}

@@ -91,7 +91,7 @@ void printBoard(const Board& board)
 			}
 			else
 			{
-				cout << "    |";
+				cout << " XX |";
 			}
         }
 
