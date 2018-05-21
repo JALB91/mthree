@@ -9,6 +9,7 @@ namespace mthree {
 class Generator
 {
 public:
+	Generator(const BoardPos&& p);
 	Generator(const BoardPos& p);
 	~Generator();
 

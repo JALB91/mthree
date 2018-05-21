@@ -2,7 +2,6 @@
 #define POS_H
 
 #include <functional>
-#include <cstdint>
 
 namespace mthree {
 

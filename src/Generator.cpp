@@ -7,10 +7,16 @@ using namespace std;
 
 namespace mthree {
 
+Generator::Generator(const BoardPos&& pos):
+pos(pos)
+{
+	
+}
+
 Generator::Generator(const BoardPos& pos):
 pos(pos)
 {
-
+	
 }
 
 Generator::~Generator()
@@ -21,9 +27,7 @@ Generator::~Generator()
 
 GameItem Generator::generate() const
 {
-	srand(time(NULL));
-	int color = rand() % ALL_COLORS.size();
-	return GameItem{ ItemType::ITEM, static_cast<ItemColor>(color) };
+	return GameItem::getRandomItem();
 }
 
 } // namespace mthree

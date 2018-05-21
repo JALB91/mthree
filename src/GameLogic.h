@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "GameState.h"
 #include "Match.h"
 #include "Board.h"
 #include "Pos.h"
@@ -13,38 +12,31 @@ namespace mthree {
 class GameLogic
 {
 public:
-    GameLogic(const Board& board);
+    GameLogic();
     ~GameLogic();
 
-    inline const Board& getBoard() const { return this->board; }
+    bool step(Board& board) const;
+    bool computeMatches(Board& board) const;
 
-	void step();
+    std::vector<Match> getValidMatches(const Board& board) const;
 
-    bool canSwap(const BoardPos& a, const BoardPos& b);
-    void trySwap(const BoardPos& a, const BoardPos& b);
+    bool canSwap(const Board& board, const BoardPos& a, const BoardPos& b) const;
+    void trySwap(Board& board, const BoardPos& a, const BoardPos& b) const;
 
 protected:
 	BoardDir getOppositeDirectionOf(const BoardDir& dir) const;
 
-    void updateMatches();
-    std::vector<BoardPos> getAdjacentsMatching(const BoardPos& pos, std::vector<BoardPos>& exclude);
-    std::vector<Match> composeValidMatches(const std::vector<BoardPos>& adjacents);
-    void filterPosBy(std::vector<std::vector<BoardPos>>& out, const std::vector<BoardPos>& from, const std::function<bool(const BoardPos&, const BoardPos&)>& comparator);
+    std::vector<BoardPos> getAdjacentsMatching(const Board& board, const BoardPos& pos, std::vector<BoardPos>& exclude) const;
+    std::vector<Match> composeValidMatches(const std::vector<BoardPos>& adjacents) const;
+    void filterPosBy(std::vector<std::vector<BoardPos>>& out, const std::vector<BoardPos>& from, const std::function<bool(const BoardPos&, const BoardPos&)>& comparator) const;
 
-    inline bool hasMatches() const { return (!this->matches.empty()); }
-    inline std::vector<Match> getMatches() const { return this->matches; }
+    void computeMatch(Board& board, const Match& match) const;
 
-    void computeMatch(const Match& match);
-
-    void explodeItemAt(const BoardPos& pos);
-    void explodeComboAt(const BoardPos& a, const BoardPos& b);
+    void explodeItemAt(Board& board, const BoardPos& pos) const;
+    void explodeComboAt(Board& board, const BoardPos& a, const BoardPos& b) const;
 
 private:
-    Board board;
-    GameState state;
-	const BoardDir gravity;
-
-    std::vector<Match> matches;
+    const BoardDir gravity;
 
 };
 

@@ -1,13 +1,12 @@
 #include "Board.h"
 
 #include <algorithm>
-#include <assert.h>
 
 using namespace std;
 
 namespace mthree {
 
-Board::Board(const vector<Tile>& tiles, const vector<Generator>& generators):
+Board::Board(const vector<Tile>& tiles /* = {} */, const vector<Generator>& generators /* = {} */):
 tiles(tiles),
 generators(generators)
 {
@@ -26,18 +25,11 @@ Board::~Board()
 
 const Tile* Board::getTileAt(const BoardPos& pos) const
 {
-	if (this->hasTile(pos))
-	{
-		auto it = find_if(this->tiles.cbegin(), this->tiles.cend(), [pos](const Tile& tile) {
-			return (tile.getPos() == pos);
-		});
+	auto it = find_if(this->tiles.cbegin(), this->tiles.cend(), [pos](const Tile& tile) {
+		return (tile.getPos() == pos);
+	});
 
-		return &(*it);
-	}
-	else
-	{
-		return nullptr;
-	}
+	return (it != this->tiles.cend() ? &(*it) : nullptr);
 }
 
 const Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir) const
@@ -49,18 +41,11 @@ const Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir) const
 
 Tile* Board::getTileAt(const BoardPos& pos)
 {
-	if (this->hasTile(pos))
-	{
-		auto it = find_if(this->tiles.begin(), this->tiles.end(), [pos](const Tile& tile) {
-			return (tile.getPos() == pos);
-		});
+	auto it = find_if(this->tiles.begin(), this->tiles.end(), [pos](const Tile& tile) {
+		return (tile.getPos() == pos);
+	});
 
-		return &(*it);
-	}
-	else
-	{
-		return nullptr;
-	}
+	return (it != this->tiles.cend() ? &(*it) : nullptr);
 }
 
 Tile* Board::getAdjacentTile(const Tile* tile, const BoardDir& dir)
@@ -132,39 +117,11 @@ BoardPos Board::getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const
 
 Generator* Board::getGeneratorAt(const BoardPos& pos)
 {
-	auto it = find_if(this->generators.cbegin(), this->generators.cend(), [pos](const Generator& generator) {
+	auto it = find_if(this->generators.begin(), this->generators.end(), [pos](const Generator& generator) {
 		return (generator.getPos() == pos);
 	});
 
 	return (it != this->generators.cend() ? &(*it) : nullptr);
-}
-
-
-bool Board::hasTile(const BoardPos& pos) const
-{
-	auto it = find_if(this->tiles.begin(), this->tiles.end(), [pos](const Tile& tile) {
-		return (tile.getPos() == pos);
-	});
-    return (it != this->tiles.end());
-}
-
-bool Board::hasAdjacentTile(const BoardPos& pos, const BoardDir& dir) const
-{
-	return this->hasTile(this->getAdjacentPos(pos, dir));
-}
-
-
-bool Board::hasGenerator(const BoardPos& pos) const
-{
-	auto it = find_if(this->generators.begin(), this->generators.end(), [pos](const Generator& generator) {
-		return (generator.getPos() == pos);
-	});
-	return (it != this->generators.end());
-}
-
-bool Board::hasAdjacentGenerator(const BoardPos& pos, const BoardDir& dir) const
-{
-	return this->hasGenerator(this->getAdjacentPos(pos, dir));
 }
 
 } //namespace mthree

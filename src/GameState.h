@@ -5,8 +5,10 @@ namespace mthree {
 
 enum class GameState
 {
+    SETUP,
+    MATCHING,
+    STEPPING,
     USER_INTERACTION,
-    MATCHING
 };
 
 } // namespace mthree

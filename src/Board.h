@@ -2,7 +2,6 @@
 #define BOARD_H
 
 #include <vector>
-#include <cstdint>
 
 #include "Pos.h"
 #include "Tile.h"
@@ -14,7 +13,7 @@ namespace mthree {
 class Board
 {
 public:
-    Board(const std::vector<Tile>& tilesMap, const std::vector<Generator>& generators);
+    Board(const std::vector<Tile>& tilesMap = {}, const std::vector<Generator>& generators = {});
     ~Board();
 
     inline std::vector<Tile>& getTiles() { return this->tiles; }
@@ -36,12 +35,6 @@ public:
 	BoardPos getAdjacentPos(const BoardPos& pos, const BoardDir& dir) const;
 
 	Generator* getGeneratorAt(const BoardPos& pos);
-
-	bool hasTile(const BoardPos& pos) const;
-	bool hasAdjacentTile(const BoardPos& pos, const BoardDir& dir) const;
-
-	bool hasGenerator(const BoardPos& pos) const;
-	bool hasAdjacentGenerator(const BoardPos& pos, const BoardDir& dir) const;
     
 protected:
 

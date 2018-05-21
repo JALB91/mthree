@@ -7,12 +7,10 @@ namespace mthree {
 bool sortByRow(const BoardPos& a, const BoardPos& b) { return ((a.y < b.y) || (a.y == b.y && a.x < b.x)); }
 bool sortByCol(const BoardPos& a, const BoardPos& b) { return ((a.x < b.x) || (a.x == b.x && a.y < b.y)); }
 
-GameLogic::GameLogic(const Board& board):
-board(board),
-state(GameState::MATCHING),
+GameLogic::GameLogic():
 gravity(BoardDir::DOWN)
 {
-	this->updateMatches();
+    
 }
 
 GameLogic::~GameLogic()
@@ -33,59 +31,63 @@ BoardDir GameLogic::getOppositeDirectionOf(const BoardDir& dir) const
 }
 
 
-void GameLogic::step()
+bool GameLogic::step(Board& board) const
 {
-	if (this->hasMatches())
-	{
-		for (const Match& match: this->matches)
-		{
-			this->computeMatch(match);
-		}
+    bool result = false;
 
-		this->matches.clear();
-	}
-
-	for (Tile& tile: this->board.getTiles())
+	for (Tile& tile: board.getTiles())
 	{
 		const BoardPos& p = tile.getPos();
 
 		if (!tile.hasItem())
 		{
-			const BoardPos& adjacent = this->board.getAdjacentPos(p, this->getOppositeDirectionOf(this->gravity));
-			Tile* other = this->board.getTileAt(adjacent);
+			const BoardPos& adjacent = board.getAdjacentPos(p, this->getOppositeDirectionOf(this->gravity));
+			Tile* other = board.getTileAt(adjacent);
 
 			if (other && other->hasItem())
 			{
 				tile.setItem(other->getItem());
 				other->setItem(GameItem::EMPTY_ITEM);
-				this->step();
-				return;
+
+                result = true;
 			}
-			else if (const Generator* generator = this->board.getGeneratorAt(adjacent))
+			else if (const Generator* generator = board.getGeneratorAt(adjacent))
 			{
 				tile.setItem(generator->generate());
-				this->step();
-				return;
+
+                result = true;
 			}
 		}
 	}
 
-	this->updateMatches();
+    return result;
+}
+
+bool GameLogic::computeMatches(Board& board) const
+{
+    vector<Match> matches = this->getValidMatches(board);
+
+    for (const Match& match: matches)
+    {
+        this->computeMatch(board, match);
+    }
+
+    return !matches.empty();
 }
 
 
-bool GameLogic::canSwap(const BoardPos& a, const BoardPos& b)
+bool GameLogic::canSwap(const Board& board, const BoardPos& a, const BoardPos& b) const
 {
     const vector<BoardPos> adjacents = board.getAllAdjacentPos(a);
 
-    if (find(adjacents.begin(), adjacents.end(), b) == adjacents.end())
+    if (find(adjacents.cbegin(), adjacents.cend(), b) == adjacents.cend())
     {
         // "a" or "b" are not valid
         return false;
     }
 
-    Tile* tA = this->board.getTileAt(a);
-    Tile* tB = this->board.getTileAt(b);
+    const Tile* tA = board.getTileAt(a);
+    const Tile* tB = board.getTileAt(b);
 
     if (tA && tB)
     {
@@ -96,14 +98,12 @@ bool GameLogic::canSwap(const BoardPos& a, const BoardPos& b)
     return false;
 }
 
-void GameLogic::trySwap(const BoardPos& a, const BoardPos& b)
+void GameLogic::trySwap(Board& board, const BoardPos& a, const BoardPos& b) const
 {
-    if (!canSwap(a, b)) return;
-    
-    this->state = GameState::MATCHING;
+    if (!canSwap(board, a, b)) return;
 
-    Tile* tA = this->board.getTileAt(a);
-    Tile* tB = this->board.getTileAt(b);
+    Tile* tA = board.getTileAt(a);
+    Tile* tB = board.getTileAt(b);
 
     GameItem giA = tA->getItem();
     GameItem giB = tB->getItem();
@@ -116,9 +116,9 @@ void GameLogic::trySwap(const BoardPos& a, const BoardPos& b)
         tB->setItem(giA);
 
         // Update current matches on the board
-        this->updateMatches();
+        const vector<Match>& matches = this->getValidMatches(board);
 
-        if (this->hasMatches())
+        if (!matches.empty())
         {
             // Compute them
         }
@@ -136,56 +136,56 @@ void GameLogic::trySwap(const BoardPos& a, const BoardPos& b)
 }
 
 
-void GameLogic::updateMatches()
+vector<Match> GameLogic::getValidMatches(const Board& board) const
 {
-    this->matches.clear();
+    vector<Match> matches;
 
-    for (int y = 0; y < this->board.getHeight(); ++y)
+    for (int y = 0; y < board.getHeight(); ++y)
     {
-        for (int x = 0; x < this->board.getWidth(); ++x)
+        for (int x = 0; x < board.getWidth(); ++x)
         {
             const BoardPos currentPos { x, y };
 
-            auto it = find_if(this->matches.begin(), this->matches.end(), [currentPos] (const Match& match) {
+            auto it = find_if(matches.begin(), matches.end(), [currentPos] (const Match& match) {
                 const vector<BoardPos>& positions = match.getPositions();
-                return (find(positions.begin(), positions.end(), currentPos) != positions.end());
+                return (find(positions.cbegin(), positions.cend(), currentPos) != positions.cend());
             });
 
             // Not checking positions already computed
-            if (it != this->matches.end() || !this->board.hasTile(currentPos)) continue;
+            if (it != matches.end() || !board.getTileAt(currentPos)) continue;
 
             vector<BoardPos> exclude;
-            vector<Match> newMatches = this->composeValidMatches(this->getAdjacentsMatching(currentPos, exclude));
+            vector<Match> newMatches = this->composeValidMatches(this->getAdjacentsMatching(board, currentPos, exclude));
 
-            this->matches.insert(this->matches.end(), newMatches.begin(), newMatches.end());
+            matches.insert(matches.end(), newMatches.begin(), newMatches.end());
         }
     }
 
-	for (int i = 0; i < this->matches.size(); ++i)
+	for (int i = 0; i < matches.size(); ++i)
 	{
-		const Match& current = this->matches[i];
+		const Match& current = matches[i];
 
-		for (const Match& other: this->matches)
+		for (const Match& other: matches)
 		{
-			if (find(this->matches.cbegin(), this->matches.cend(), other) == find(this->matches.cbegin(), this->matches.cend(), current)) continue;
+			if (find(matches.cbegin(), matches.cend(), other) == find(matches.cbegin(), matches.cend(), current)) continue;
 
 			if (current == other || (current.isInTheWayOf(other) && !current.isBetterThan(other)))
 			{
-				this->matches.erase(this->matches.begin() + i);
+				matches.erase(matches.begin() + i);
 				i--;
 				break;
 			}
 		}
 	}
+
+    return matches;
 }
 
-vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<BoardPos>& exclude)
+vector<BoardPos> GameLogic::getAdjacentsMatching(const Board& board, const BoardPos& pos, vector<BoardPos>& exclude) const
 {
-    if (!this->board.hasTile(pos)) return {};
+    const Tile* currentTile = board.getTileAt(pos);
 
-    Tile* currentTile = this->board.getTileAt(pos);
-
-    if (!currentTile->hasItem()) return {};
+    if (!currentTile || !currentTile->hasItem()) return {};
 
     const GameItem& currentItem = currentTile->getItem();
 
@@ -196,27 +196,27 @@ vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<Boa
     }
 
     vector<BoardPos> result { pos };
-    vector<BoardPos> adjacents = this->board.getAllAdjacentPos(pos);
+    vector<BoardPos> adjacents = board.getAllAdjacentPos(pos);
 
     exclude.push_back(pos);
 
     for (const BoardPos& adj: adjacents)
     {
-        if (find(exclude.begin(), exclude.end(), adj) != exclude.end() || !this->board.hasTile(adj))
+        if (find(exclude.cbegin(), exclude.cend(), adj) != exclude.cend())
         {
             continue;
         }
 
-        Tile* adjTile = this->board.getTileAt(adj);
+        const Tile* adjTile = board.getTileAt(adj);
 
-        if (!adjTile->hasItem()) continue;
+        if (!adjTile || !adjTile->hasItem()) continue;
 
         const GameItem& adjItem = adjTile->getItem();
 
         if (adjItem.getColor() == currentItem.getColor())
         {
             // Two items matches if they are of the same color
-            vector<BoardPos> adjMatching = this->getAdjacentsMatching(adj, exclude);
+            vector<BoardPos> adjMatching = getAdjacentsMatching(board, adj, exclude);
             result.insert(result.begin(), adjMatching.begin(), adjMatching.end());
         }
     }
@@ -232,7 +232,7 @@ vector<BoardPos> GameLogic::getAdjacentsMatching(const BoardPos& pos, vector<Boa
 
     The method will return a vector of valid matches from them
 */
-vector<Match> GameLogic::composeValidMatches(const vector<BoardPos>& adjacents)
+vector<Match> GameLogic::composeValidMatches(const vector<BoardPos>& adjacents) const
 {
     vector<Match> result;
 
@@ -265,7 +265,7 @@ vector<Match> GameLogic::composeValidMatches(const vector<BoardPos>& adjacents)
 }
 
 
-void GameLogic::filterPosBy(vector<vector<BoardPos>>& out, const vector<BoardPos>& from, const function<bool(const BoardPos&, const BoardPos&)>& comparator)
+void GameLogic::filterPosBy(vector<vector<BoardPos>>& out, const vector<BoardPos>& from, const function<bool(const BoardPos&, const BoardPos&)>& comparator) const
 {
     for (const BoardPos& pos: from)
     {
@@ -294,21 +294,24 @@ void GameLogic::filterPosBy(vector<vector<BoardPos>>& out, const vector<BoardPos
 }
 
 
-void GameLogic::computeMatch(const Match& match)
+void GameLogic::computeMatch(Board& board, const Match& match) const
 {
 	for (const BoardPos& pos: match.getPositions())
 	{
-		this->board.getTileAt(pos)->setItem(GameItem::EMPTY_ITEM);
+        if (Tile* tile = board.getTileAt(pos))
+        {
+            tile->setItem(GameItem::EMPTY_ITEM);
+        }
 	}
 }
 
 
-void GameLogic::explodeItemAt(const BoardPos& pos)
+void GameLogic::explodeItemAt(Board& board, const BoardPos& pos) const
 {
 
 }
 
-void GameLogic::explodeComboAt(const BoardPos& a, const BoardPos& b)
+void GameLogic::explodeComboAt(Board& board, const BoardPos& a, const BoardPos& b) const
 {
 
 }

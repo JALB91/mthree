@@ -63,7 +63,7 @@ string gameItemToString(const GameItem& item)
 
 void printRow(int width)
 {
-    for (uint8_t x = 0; x < width; ++x)
+    for (int x = 0; x < width; ++x)
     {
         cout << "- -- ";
     }
@@ -77,17 +77,17 @@ void printBoard(const Board& board)
 
     printRow(board.getWidth());
 
-    for (uint8_t y = 0; y < board.getHeight(); ++y)
+    for (int y = 0; y < board.getHeight(); ++y)
     {
         cout << "|";
 
-        for (uint8_t x = 0; x < board.getWidth(); ++x)
+        for (int x = 0; x < board.getWidth(); ++x)
         {
             BoardPos p {x, y};
 
-			if (board.hasTile(p))
+			if (const Tile* tile = board.getTileAt(p))
 			{
-				cout << " " + gameItemToString(board.getTileAt(p)->getItem()) << " |";
+				cout << " " + gameItemToString(tile->getItem()) << " |";
 			}
 			else
 			{

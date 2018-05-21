@@ -1,6 +1,8 @@
 #ifndef GAME_ITEM_H
 #define GAME_ITEM_H
 
+#include <cstdint>
+
 #include "ItemType.h"
 #include "ItemColor.h"
 
@@ -9,13 +11,21 @@ namespace mthree {
 class GameItem
 {
 public:
+    using ITEM_ID = uint64_t;
+    static ITEM_ID next_id;
+
+public:
 	static const GameItem EMPTY_ITEM;
 
+    static GameItem getRandomItem();
+
+public:
     GameItem(const ItemType& type = ItemType::EMPTY, const ItemColor& color = ItemColor::NO_COLOR);
     ~GameItem();
 
-    inline const ItemType& getType() const { return type; }
-    inline const ItemColor& getColor() const { return color; }
+    inline const ItemType& getType() const { return this->type; }
+    inline const ItemColor& getColor() const { return this->color; }
+    inline const ITEM_ID& getItemId() const { return this->id; }
 
 public:
     bool operator==(const GameItem& other) const
@@ -34,6 +44,7 @@ protected:
     ItemColor color;
 
 private:
+    ITEM_ID id;
 
 };
 
